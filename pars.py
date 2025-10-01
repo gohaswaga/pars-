@@ -8,15 +8,15 @@ import os, csv
 import random
 import time
 
-chrome_version = random.randint(110, 140)
-windows_version = random.randint(10, 11)
-opts = Options()
-opts.add_argument("--headless")
-opts.add_argument(f"user-agent=Mozilla/5.0 (Windows NT {windows_version}.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/{chrome_version}.0.0.0 Safari/537.36")
+def create_driver():
+    chrome_version = random.randint(110, 140)
+    windows_version = random.randint(10, 11)
+    opts = Options()
+    opts.add_argument("--headless")
+    opts.add_argument(f"user-agent=Mozilla/5.0 (Windows NT {windows_version}.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/{chrome_version}.0.0.0 Safari/537.36")
+    return webdriver.Chrome(options=opts)
 
-driver = webdriver.Chrome(options=opts)
-
-number_of_pages = 15
+number_of_pages = 2
 all_links = set()
 
 def get_all_links_on_page(driver):
@@ -32,6 +32,7 @@ def get_all_links_on_page(driver):
 
 for page in range(1, number_of_pages + 1):
     url = f"https://catalog.onliner.by/mobile?page={page}"
+    driver = create_driver()
     try:
         driver.get(url)
         time.sleep(random.uniform(2, 4))
@@ -54,6 +55,12 @@ with open('clean_links.csv', 'a', newline='', encoding='utf-8') as file:
 
 if os.path.exists("onliner_links.csv"):
     os.remove("onliner_links.csv")
-    print("[Очистка] Временный файл удалён.")
 
-driver.quit()
+def log_technique(name, type, power):
+    file_exists = os.path.isfile('log_technique.csv')
+    with open('log_technique.csv', 'a', newline='', encoding='utf-8') as file:
+        writer = csv.writer(file)
+        if not file_exists:
+            writer.writerow(['Number', 'Name', 'Type', 'Power'])
+        row_count = sum(1 for _ in open('log_technique.csv', encoding='utf-8')) - 1
+        writer.writerow([row_count + 1, name, type, power])
